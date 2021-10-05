@@ -1,0 +1,43 @@
+name: generate-metadata action
+description: This action creates JSON file containing metadata information
+inputs:
+  branch:
+    description: 'Github Branch of changes'
+    required: false
+  filePath:
+    description: 'An existing file path that denotes the location of the `metadataFileName` to be created. Default set to default github action root path'
+    required: false
+  metadataFileName:
+    description: 'The name of the JSON file produced by the action. The generated file will have a JSON format. Default set to "metadata.json"'
+    required: false
+    default: "metadata.json"
+  product:
+    description: 'The product binary name'
+    required: false
+  repository:
+    description: 'The repository name for collecting the metadata'
+    required: true
+  repositoryOwner:
+    description: 'The repository owner (organization or user). Default is set to "hashicorp" organization'
+    required: false
+    default: 'hashicorp'
+  version:
+    description: 'Version or version command (e.g: make version)'
+    required: true
+
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.branch }}
+    - ${{ inputs.filePath }}
+    - ${{ inputs.metadataFileName }}
+    - ${{ inputs.product }}
+    - ${{ inputs.repository }}
+    - ${{ inputs.repositoryOwner }}
+    - ${{ inputs.sha }}
+    - ${{ inputs.version }}
+
+outputs:
+  filepath:
+    description: 'The metadata.json file path'
