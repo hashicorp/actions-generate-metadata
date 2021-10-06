@@ -2,10 +2,9 @@ name: Test generate-metadata-action
 
 on:
   push:
-    branches:
-      - "*"
     paths-ignore:
       - 'README.md'
+      - LICENSE
 
 jobs:
   action-run:
@@ -17,10 +16,11 @@ jobs:
         uses: actions/checkout@v2
       - name: Generate metadata file
         id: generate_metadata
-      - uses: ./
+        uses: ./
         with:
           repository: ${{ github.event.repository.name }}
-          version: make version
+          version: make -f tests/Makefile version
+          product: ${{ github.event.repository.name }}
 
       - uses: actions/upload-artifact@v2
         with:

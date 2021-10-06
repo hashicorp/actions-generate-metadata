@@ -72,9 +72,10 @@ func checkFileIsExist(filepath string) bool {
 
 func createMetadataJson(in input) string {
 	branch := in.branch
-	branch = strings.TrimPrefix(branch, "refs/heads/")
-	if branch == "" {
-		actions.Warningf("Missing value for the 'branch'")
+	if branch == "" && os.Getenv("GITHUB_HEAD_REF") == "" {
+		branch = "main"
+	} else {
+		branch = os.Getenv("GITHUB_HEAD_REF")
 	}
 	actions.Infof("Working branch %v\n", branch)
 
