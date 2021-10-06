@@ -20,7 +20,7 @@ type input struct {
 	metadataFileName string
 	product          string
 	repository       string
-	repositoryOwner  string
+	org              string
 	sha              string
 	version          string
 }
@@ -30,7 +30,7 @@ type Metadata struct {
 	BuildWorkflowId string `json:"buildWorkflowId"`
 	Product         string `json:"product"`
 	Repository      string `json:"repository""`
-	RepositoryOwner string `json:"repositoryOwner"`
+	Org             string `json:"Org"`
 	Revision        string `json:"sha"`
 	Version         string `json:"version"`
 }
@@ -42,7 +42,7 @@ func main() {
 		metadataFileName: actions.GetInput("metadataFileName"),
 		product:          actions.GetInput("product"),
 		repository:       actions.GetInput("repository"),
-		repositoryOwner:  actions.GetInput("repositoryOwner"),
+		org:              actions.GetInput("org"),
 		sha:              actions.GetInput("sha"),
 		version:          actions.GetInput("version"),
 	}
@@ -66,7 +66,7 @@ func checkFileIsExist(filepath string) bool {
 	if err != nil {
 		actions.Fatalf("failed to read file: %v", filepath)
 	}
-	// Return false if the fileInfo says the file path is a directory.
+	// Return false if the fileInfo says the file path is a directory
 	return !fileInfo.IsDir()
 }
 
@@ -98,10 +98,9 @@ func createMetadataJson(in input) string {
 		sha = os.Getenv("GITHUB_REPOSITORY")
 	}
 
-	repoOwner := in.repositoryOwner
-	if repoOwner == "" {
-		//actions.Warningf("Missing input 'product'")
-		repoOwner = defaultRepositoryOwner
+	org := in.org
+	if org == "" {
+		org = defaultRepositoryOwner
 	}
 
 	runId := os.Getenv("GITHUB_RUN_ID")
@@ -121,7 +120,7 @@ func createMetadataJson(in input) string {
 
 	m := &Metadata{
 		Product:         product,
-		RepositoryOwner: repoOwner,
+		Org:             org,
 		Revision:        sha,
 		BuildWorkflowId: runId,
 		Version:         version,
@@ -139,15 +138,6 @@ func createMetadataJson(in input) string {
 	}
 	return filePath
 }
-
-//func getSha() string {
-//	// git rev-parse HEAD
-//	sha := execCommand("git", "rev-parse", "HEAD")
-//	if len(sha) == 0 {
-//		actions.Fatalf("Failed to determine git sha for this commit")
-//	}
-//	return strings.TrimSpace(sha)
-//}
 
 func getVersion(command string) string {
 	version := execCommand(strings.Fields(command)...)

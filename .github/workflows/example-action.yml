@@ -1,11 +1,6 @@
-name: Test generate-metadata-action
+name: Usage Example generate-metadata-action
 
-on:
-  push:
-    branches:
-      - "*"
-    paths-ignore:
-      - 'README.md'
+on: [release]
 
 jobs:
   action-run:
@@ -15,12 +10,18 @@ jobs:
     steps:
       - name: 'Checkout directory'
         uses: actions/checkout@v2
+
       - name: Generate metadata file
         id: generate_metadata
-      - uses: ./
+        uses: hashicorp/generate-metadata-action@main
         with:
           repository: ${{ github.event.repository.name }}
-          version: make version
+          version: 1.2.3
+          branch: ${{ github.ref }}
+          product: test-binary
+
+      - name: Check file creation
+        run: ls -lah
 
       - uses: actions/upload-artifact@v2
         with:
