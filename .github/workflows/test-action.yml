@@ -1,4 +1,4 @@
-name: Test generate-metadata-action
+name: test generate-metadata-action
 
 on:
   push:
