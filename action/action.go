@@ -74,7 +74,7 @@ func createMetadataJson(in input) string {
 	branch := in.branch
 	actions.Infof("GITHUB_HEAD_REF %v\n", os.Getenv("GITHUB_HEAD_REF"))
 	actions.Infof("GITHUB_REF %v\n", os.Getenv("GITHUB_REF"))
-	if branch == "" && os.Getenv("GITHUB_HEAD_REF") == "" {
+	if branch == "" && os.Getenv("GITHUB_HEAD_REF") == "" &&  strings.Contains(os.Getenv("GITHUB_REF"), "refs/heads/"){
 		branch = "main"
 	} else {
 		branch = strings.TrimSuffix(os.Getenv("GITHUB_REF"), "refs/heads/")
