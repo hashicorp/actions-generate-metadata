@@ -1,0 +1,28 @@
+name: Test generate-metadata-action
+
+on:
+  push:
+    paths-ignore:
+      - 'README.md'
+      - LICENSE
+
+jobs:
+  action-run:
+    runs-on: ubuntu-latest
+    outputs:
+      filepath: ${{ steps.action-run.outputs.filepath }}
+    steps:
+      - name: 'Checkout directory'
+        uses: actions/checkout@v2
+      - name: Generate metadata file
+        id: generate_metadata
+        uses: ./
+        with:
+          repository: ${{ github.event.repository.name }}
+          version: make -f tests/Makefile version
+          product: ${{ github.event.repository.name }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: metadata.json
+          path: ${{ steps.generate_metadata.outputs.filepath }}

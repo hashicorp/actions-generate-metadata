@@ -1,0 +1,31 @@
+name: Usage Example generate-metadata-action
+#This is only an example of using the action
+# This workflow will not be triggered unless new action version is released
+# verify example works after new version of action is released
+on: [release]
+
+jobs:
+  action-run:
+    runs-on: ubuntu-latest
+    outputs:
+      filepath: ${{ steps.action-run.outputs.filepath }}
+    steps:
+      - name: 'Checkout directory'
+        uses: actions/checkout@v2
+
+      - name: Generate metadata file
+        id: generate_metadata
+        uses: hashicorp/generate-metadata-action@main
+        with:
+          repository: ${{ github.event.repository.name }}
+          version: 1.2.3
+          branch: ${{ github.ref }}
+          product: test-binary
+
+      - name: Check file creation
+        run: ls -lah
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: metadata.json
+          path: ${{ steps.generate_metadata.outputs.filepath }}
