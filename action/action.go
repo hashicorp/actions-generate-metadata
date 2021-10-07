@@ -75,7 +75,7 @@ func createMetadataJson(in input) string {
 	if branch == "" && os.Getenv("GITHUB_HEAD_REF") == "" {
 		branch = "main"
 	} else {
-		branch = os.Getenv("GITHUB_HEAD_REF")
+		branch = os.Getenv("GITHUB_REF")
 	}
 	actions.Infof("Working branch %v\n", branch)
 

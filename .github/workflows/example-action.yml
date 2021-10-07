@@ -1,5 +1,5 @@
 name: Usage Example generate-metadata-action
-#This is only an example of using the action
+# This is only an example of using the action
 # This workflow will not be triggered unless new action version is released
 # verify example works after new version of action is released
 on: [release]
