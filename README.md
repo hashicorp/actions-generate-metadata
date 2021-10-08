@@ -47,7 +47,7 @@ See [action.yaml](https://github.com/hashicorp/actions-generate-metadata/blob/ma
 * **`repository`** - (required). The repository name for collecting the metadata
 * **`version`** - (required). Indicates the version to be set in the metadata file. Can also accept the command which will set the version (e.g "make version")*
 
-* **`branch`** - (optional). 'Github Branch of changes'
+* **`branch`** - (optional). Github Branch of changes
 * **`filePath`** - (optional). Existing path that denotes the location of the metadata file to be created. The action will not create specified directory if it not exist. Default is set to Github action root path.
 * **`product`** - (optional). The product binary name
 * **`repositoryOwner`** - (optional). The repository owner (organization or user). Default is set to "hashicorp" organization
