@@ -19,7 +19,7 @@ type input struct {
 	filePath         string
 	metadataFileName string
 	product          string
-	repository       string
+	repo             string
 	org              string
 	sha              string
 	version          string
@@ -29,7 +29,7 @@ type Metadata struct {
 	Branch          string `json:"branch"`
 	BuildWorkflowId string `json:"buildWorkflowId"`
 	Product         string `json:"product"`
-	Repository      string `json:"repository""`
+	Repo            string `json:"repo""`
 	Org             string `json:"org"`
 	Revision        string `json:"sha"`
 	Version         string `json:"version"`
@@ -41,7 +41,7 @@ func main() {
 		filePath:         actions.GetInput("filePath"),
 		metadataFileName: actions.GetInput("metadataFileName"),
 		product:          actions.GetInput("product"),
-		repository:       actions.GetInput("repository"),
+		repo:             actions.GetInput("repo"),
 		org:              actions.GetInput("org"),
 		sha:              actions.GetInput("sha"),
 		version:          actions.GetInput("version"),
@@ -74,7 +74,7 @@ func createMetadataJson(in input) string {
 	branch := in.branch
 	actions.Infof("GITHUB_HEAD_REF %v\n", os.Getenv("GITHUB_HEAD_REF"))
 	actions.Infof("GITHUB_REF %v\n", os.Getenv("GITHUB_REF"))
-	if branch == "" && os.Getenv("GITHUB_HEAD_REF") ==  "" {
+	if branch == "" && os.Getenv("GITHUB_HEAD_REF") == "" {
 		branch = strings.TrimPrefix(os.Getenv("GITHUB_REF"), "refs/heads/")
 	} else {
 		branch = os.Getenv("GITHUB_HEAD_REF")
@@ -87,9 +87,10 @@ func createMetadataJson(in input) string {
 		file = defaultMetadataFileName
 	}
 	filePath := path.Join(in.filePath, file)
+
 	product := in.product
 	if product == "" {
-		actions.Warningf("Missing input 'product'")
+		actions.Fatalf("Missing input 'product' value")
 	}
 	sha := in.sha
 	if sha == "" {
@@ -97,14 +98,13 @@ func createMetadataJson(in input) string {
 	}
 	actions.Infof("Working sha %v\n", sha)
 
-	repository := in.repository
-	if repository == "" {
-		sha = os.Getenv("GITHUB_REPOSITORY")
-	}
-
 	org := in.org
 	if org == "" {
 		org = defaultRepositoryOwner
+	}
+	repository := in.repo
+	if repository == "" {
+		repository = strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")[1]
 	}
 
 	runId := os.Getenv("GITHUB_RUN_ID")
@@ -129,7 +129,7 @@ func createMetadataJson(in input) string {
 		BuildWorkflowId: runId,
 		Version:         version,
 		Branch:          branch,
-		Repository:      repository}
+		Repo:            repository}
 	output, err := json.MarshalIndent(m, "", "\t\t")
 
 	if err != nil {
