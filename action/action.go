@@ -27,7 +27,7 @@ type input struct {
 
 type Metadata struct {
 	Branch          string `json:"branch"`
-	BuildWorkflowId string `json:"buildWorkflowId"`
+	BuildWorkflowId string `json:"buildworkflowid"`
 	Product         string `json:"product"`
 	Repo            string `json:"repo""`
 	Org             string `json:"org"`
