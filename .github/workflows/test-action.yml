@@ -22,7 +22,7 @@ jobs:
           version: make -f tests/Makefile version
           product: ${{ github.event.repository.name }}
 
-      - name: Upload artifacts
-        uses: ./.github/actions/upload_package_artifacts
+      - uses: actions/upload-artifact@v2
         with:
-          folder: ${{ generate_metadata.filepath }}
+          name: metadata.json
+          path: ${{ steps.generate_metadata.outputs.filepath }}
