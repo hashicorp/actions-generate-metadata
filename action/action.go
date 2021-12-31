@@ -41,8 +41,8 @@ func main() {
 		filePath:         actions.GetInput("filePath"),
 		metadataFileName: actions.GetInput("metadataFileName"),
 		product:          actions.GetInput("product"),
-		repo:             actions.GetInput("repo"),
-		org:              actions.GetInput("org"),
+		repo:             actions.GetInput("repository"),
+		org:              actions.GetInput("repositoryOwner"),
 		sha:              actions.GetInput("sha"),
 		version:          actions.GetInput("version"),
 	}
