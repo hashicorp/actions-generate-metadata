@@ -42,8 +42,9 @@ jobs:
           version: make -f tests/Makefile version
           product: ${{ github.event.repository.name }}
           sha: "6064764fb6b6213724fa55ce0fe737362ab97a12"
+          metadataFileName: "metadata-sha-test.json"
 
       - uses: actions/upload-artifact@v2
         with:
-          name: metadata.json
+          name: metadata-sha-test.json
           path: ${{ steps.generate_metadata.outputs.filepath }}
