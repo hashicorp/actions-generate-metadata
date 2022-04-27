@@ -24,6 +24,10 @@ inputs:
   version:
     description: 'Version or version command (e.g: make version)'
     required: true
+  sha:
+    description: 'The build commit sha'
+    required: false
+    
 
 runs:
   using: docker
