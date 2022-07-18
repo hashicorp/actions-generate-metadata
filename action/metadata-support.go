@@ -12,9 +12,8 @@ import (
 
 // getArtifacts queries github for artifact list, returning a 2 dimensional slice of
 // artifact names paired with their variant type.
-// repo expects name of the product as it appears in its artifacts
-// as completely as possible, for example, "vault" for oss vault and "vault-enterprise"
-// for enterprise vault.
+// org, repo, and workflowrunID are the github vars passed in to the API for the
+// workflow run query, see: https://docs.github.com/en/rest/actions/artifacts#list-workflow-run-artifacts
 func getArtifacts(org string, repo string, workflowRunID int64) [][]string {
 
 	// Auth to github API.
@@ -44,7 +43,7 @@ func getArtifacts(org string, repo string, workflowRunID int64) [][]string {
 	}
 
 	// Parse raw list of artifact names into struct of Artifacts and variant names.
-	// For Vault products, associate variant types with their artifacts, all other products
+	// For Vault products, associate variant types with their artifacts. All other products
 	// do not require variant grouping and thus are associated with variant type "all".
 	var processedArtifacts [][]string
 	if repo == "vault-enterprise" {
