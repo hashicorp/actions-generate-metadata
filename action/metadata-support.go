@@ -19,9 +19,9 @@ import (
 func getArtifacts(org string, repo string, workflowRunID int64) map[string][]string {
 
 	// Auth to github API.
-	token := os.Getenv("CRT_GITHUB_TOKEN")
+	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
-		githubactions.Errorf("missing env CRT_GITHUB_TOKEN")
+		githubactions.Fatalf("missing env GITHUB_TOKEN")
 	}
 
 	ctx := context.Background()
