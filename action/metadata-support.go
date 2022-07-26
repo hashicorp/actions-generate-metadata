@@ -136,8 +136,8 @@ func correctProductNameDocker(productName string) string {
 		// remainder of the list looking for the semver and setting anything else to an
 		// empty string. When we find the semver, break out of this loop.
 		if _, ok := dockerExceptions[word]; ok {
+			re := regexp.MustCompile(`(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*).*?[^_]*`)
 			for j := i; j < len(substrings); j++ {
-				re := regexp.MustCompile(`(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*).*?[^_]*`)
 				found := re.MatchString(substrings[j])
 				if found {
 					break
