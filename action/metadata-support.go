@@ -32,8 +32,8 @@ func getArtifacts(org string, repo string, workflowRunID int64) map[string][]str
 	ghClient := github.NewClient(tc)
 
 	// Query API for list of artifacts associated with specified build workflow of product.
-	opt := &github.ListOptions{PerPage: 100}
-	var artifacts []*github.ArtifactList
+	opt := &github.ListOptions{PerPage: 100} // 100 is max resposes per page.
+	var artifacts []*github.ArtifactList     // each page of results is an element in array.
 	for {
 		artifactPage, response, err := ghClient.Actions.ListWorkflowRunArtifacts(ctx, org, repo, workflowRunID, opt)
 		if err != nil {
