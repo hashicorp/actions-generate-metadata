@@ -19,9 +19,9 @@ import (
 func getArtifacts(org string, repo string, workflowRunID int64) map[string][]string {
 
 	// Auth to github API.
-	token := os.Getenv("GITHUB_TOKEN")
+	token := os.Getenv("CRT_GITHUB_TOKEN")
 	if token == "" {
-		githubactions.Fatalf("missing env GITHUB_TOKEN")
+		githubactions.Errorf("missing env CRT_GITHUB_TOKEN")
 	}
 
 	ctx := context.Background()
@@ -32,16 +32,27 @@ func getArtifacts(org string, repo string, workflowRunID int64) map[string][]str
 	ghClient := github.NewClient(tc)
 
 	// Query API for list of artifacts associated with specified build workflow of product.
-	artifacts, _, err := ghClient.Actions.ListWorkflowRunArtifacts(ctx, org, repo, workflowRunID, &github.ListOptions{})
-	if err != nil {
-		fmt.Println(err)
+	opt := &github.ListOptions{PerPage: 100}
+	var artifacts []*github.ArtifactList
+	for {
+		artifactPage, response, err := ghClient.Actions.ListWorkflowRunArtifacts(ctx, org, repo, workflowRunID, opt)
+		if err != nil {
+			fmt.Println(err)
+		}
+		artifacts = append(artifacts, artifactPage)
+		if response.NextPage == 0 {
+			break
+		}
+		opt.Page = response.NextPage
 	}
 
 	// Extract a list of artifact names from the artifact data structure returned from the
 	// github API.
 	var rawArtifacts []string
-	for i := range artifacts.Artifacts {
-		rawArtifacts = append(rawArtifacts, *artifacts.Artifacts[i].Name)
+	for i := range artifacts {
+		for j := range artifacts[i].Artifacts {
+			rawArtifacts = append(rawArtifacts, *artifacts[i].Artifacts[j].Name)
+		}
 	}
 
 	// Parse raw list of artifact names into struct of Artifacts and variant names.
@@ -63,6 +74,7 @@ func getArtifacts(org string, repo string, workflowRunID int64) map[string][]str
 	}
 
 	return processedArtifacts
+
 }
 
 // extractProductName accepts an artifact name, ie. "product_1.2.3-ent_amd64.deb" and
