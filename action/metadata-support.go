@@ -56,12 +56,8 @@ func getArtifacts(org string, repo string, workflowRunID int64) map[string][]str
 	}
 
 	// Parse raw list of artifact names into struct of Artifacts and variant names.
-	// For Vault products, associate variant types with their artifacts. All other products
-	// do not require variant grouping and thus are associated with variant type "all".
+	// Some builds include files that are not build artifacts; we weed those out here.
 	processedArtifacts := make(map[string][]string)
-
-	// for all other products, we don't need to sort variants, but some builds include
-	// metadata files in their artifacts - this removes those from our final list.
 	for i := range rawArtifacts {
 		switch {
 		case strings.Contains(rawArtifacts[i], ".json") || strings.Contains(rawArtifacts[i], ".sig") ||
