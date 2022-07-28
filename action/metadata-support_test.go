@@ -41,6 +41,8 @@ func TestExtractProductName(t *testing.T) {
 			name:     "consul-enterprise_default_linux_386_1.13.0-dev+ent_4700797934aaf631edfeeb58ede73e6484778492.docker.dev.tar",
 			expected: "consul-enterprise_1.13.0-dev+ent",
 		},
+
+		// consul k8s test cases, verifies that control-plane correctly slots into its own variant
 		{ // consul k8s
 			name:     "consul-k8s_0.46.0_windows_amd64.zip",
 			expected: "consul-k8s_0.46.0",
@@ -49,6 +51,9 @@ func TestExtractProductName(t *testing.T) {
 			name:     "consul-k8s-control-plane_0.46.0_darwin_arm64.zip",
 			expected: "consul-k8s-control-plane_0.46.0",
 		},
+
+		// vault test cases, checking both OSS and all of the possible variants of
+		// vault enterprise (hsm, fips, hsm.fips, etc)
 		{ // regular ol vault dev with some rpm edge cases
 			name:     "vault-1.12.0~dev1-1.armv7hl.rpm",
 			expected: "vault_1.12.0-dev1",
