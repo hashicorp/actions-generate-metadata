@@ -12,7 +12,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// getArtifacts queries github for artifact list, returning a 2 dimensional slice of
+// getArtifacts queries github for artifact list, returning a map of strings of
 // artifact names paired with their variant type.
 // org, repo, and workflowrunID are the github vars passed in to the API for the
 // workflow run query, see: https://docs.github.com/en/rest/actions/artifacts#list-workflow-run-artifacts
