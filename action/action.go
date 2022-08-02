@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	actions "github.com/sethvargo/go-githubactions"
 	"io/ioutil"
@@ -13,6 +14,7 @@ import (
 
 const defaultRepositoryOwner string = "hashicorp"
 const defaultMetadataFileName string = "metadata.json"
+const releasePath = ".release"
 
 type input struct {
 	branch           string
@@ -26,13 +28,15 @@ type input struct {
 }
 
 type Metadata struct {
-	Branch          string `json:"branch"`
-	BuildWorkflowId string `json:"buildworkflowid"`
-	Product         string `json:"product"`
-	Repo            string `json:"repo""`
-	Org             string `json:"org"`
-	Revision        string `json:"sha"`
-	Version         string `json:"version"`
+	Branch          string            `json:"branch"`
+	BuildWorkflowId string            `json:"buildworkflowid"`
+	Product         string            `json:"product"`
+	Repo            string            `json:"repo"`
+	Org             string            `json:"org"`
+	ReleaseMetadata map[string]string `json:"release-metadata"`
+	Revision        string            `json:"sha"`
+	SecurityScan    map[string]string `json:"security-scan"`
+	Version         string            `json:"version"`
 }
 
 func main() {
@@ -68,6 +72,52 @@ func checkFileIsExist(filepath string) bool {
 	}
 	// Return false if the fileInfo says the file path is a directory
 	return !fileInfo.IsDir()
+}
+
+func b64EncodeReleaseMetadata(productVersions []string) (map[string]string, error) {
+	const (
+		defaultReleaseMetadata = releasePath + "/release-metadata.hcl"
+	)
+
+	b64, err := b64EncodeFile(defaultReleaseMetadata)
+	if err != nil {
+		return nil, err
+	}
+
+	metadata := make(map[string]string)
+	for _, version := range productVersions {
+		metadata[version] = b64
+	}
+
+	return metadata, nil
+}
+
+func b64EncodeSecurityScan(productVersions []string) (map[string]string, error) {
+	const (
+		defaultSecurityScan = releasePath + "/security-scan.hcl"
+	)
+
+	b64, err := b64EncodeFile(defaultSecurityScan)
+	if err != nil {
+		return nil, err
+	}
+
+	scan := make(map[string]string)
+	for _, version := range productVersions {
+		scan[version] = b64
+	}
+
+	return scan, nil
+}
+
+func b64EncodeFile(path string) (string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	b64 := base64.StdEncoding.EncodeToString(data)
+
+	return b64, nil
 }
 
 func createMetadataJson(in input) string {
@@ -122,14 +172,31 @@ func createMetadataJson(in input) string {
 
 	actions.Infof("Creating metadata file in %v\n", filePath)
 
+	// For release-metadata.hcl and security-scan.hcl, we currently only recognize one product version
+	// per repository, but plan to support multiple in the future. Until that is supported, assume all
+	// use the same metadata and security-scan configuration group it under the base product-version
+	productVersion := product + "_" + version
+
+	metadata, err := b64EncodeReleaseMetadata([]string{productVersion})
+	if err != nil {
+		actions.Fatalf(err.Error())
+	}
+	scan, err := b64EncodeSecurityScan([]string{productVersion})
+	if err != nil {
+		actions.Fatalf(err.Error())
+	}
+
 	m := &Metadata{
 		Product:         product,
 		Org:             org,
 		Revision:        sha,
 		BuildWorkflowId: runId,
-		Version:         version,
 		Branch:          branch,
-		Repo:            repository}
+		Version:         version,
+		Repo:            repository,
+		ReleaseMetadata: metadata,
+		SecurityScan:    scan,
+	}
 	output, err := json.MarshalIndent(m, "", "\t\t")
 
 	if err != nil {
