@@ -83,7 +83,7 @@ func extractProductName(rawArtifactName string) string {
 	// cases. Finally, we return the match minus the arch/file extenion.
 	productName := ""
 	// RPMs use a . instead of a _ to delinate their extentions.
-	if strings.Contains(rawArtifactName, "rpm") {
+	if strings.HasSuffix(rawArtifactName, "rpm") {
 		re := regexp.MustCompile(`^.*(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*).*?[^\.]*`)
 		productName = re.FindString(rawArtifactName)
 		productName = correctProductNameRPM(productName)
@@ -104,11 +104,7 @@ func extractProductName(rawArtifactName string) string {
 
 	// Some artifact names have a -1 after the semver, we want to remove that for our product
 	// name.
-	if len(productName) > 1 {
-		if productName[len(productName)-2:] == "-1" {
-			productName = productName[:len(productName)-2]
-		}
-	}
+	productName = strings.TrimSuffix(productName, "-1")
 
 	return productName
 }
