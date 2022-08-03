@@ -65,7 +65,9 @@ func getArtifacts(org string, repo string, workflowRunID int64) map[string][]str
 			githubactions.Infof("File %v does not match any expected pattern.", rawArtifacts[i])
 		default:
 			productName := extractProductName(rawArtifacts[i])
-			processedArtifacts[productName] = append(processedArtifacts[productName], rawArtifacts[i])
+			if productName != "" {
+				processedArtifacts[productName] = append(processedArtifacts[productName], rawArtifacts[i])
+			}
 		}
 	}
 
