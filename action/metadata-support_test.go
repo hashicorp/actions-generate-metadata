@@ -51,6 +51,10 @@ func TestExtractProductName(t *testing.T) {
 			name:     "consul-k8s-control-plane_0.46.0_darwin_arm64.zip",
 			expected: "consul-k8s-control-plane_0.46.0",
 		},
+		{ // consul k8s control plane docker
+			name:     "consul-k8s_ubi_linux_amd64_0.46.0_45901d13d0fddf9067ebd1cfb18854c1ef943943.docker.dev.tar",
+			expected: "consul-k8s-control-plane_0.46.0",
+		},
 
 		// vault test cases, checking both OSS and all of the possible variants of
 		// vault enterprise (hsm, fips, hsm.fips, etc)
