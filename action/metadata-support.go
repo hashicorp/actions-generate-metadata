@@ -149,6 +149,13 @@ func correctProductNameDocker(productName string) string {
 		}
 	}
 
+	// We have to correct for a special case with consul-k8s - all docker images for this
+	// product are consul-k8s-control-plane, however their docker naming scheme uses just
+	// consul-k8s.
+	if strings.HasPrefix(newProductName, "consul-k8s") {
+		newProductName = strings.Replace(newProductName, "consul-k8s", "consul-k8s-control-plane", 1)
+	}
+
 	return newProductName
 }
 
