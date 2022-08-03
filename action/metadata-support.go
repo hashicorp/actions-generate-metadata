@@ -49,9 +49,9 @@ func getArtifacts(org string, repo string, workflowRunID int64) map[string][]str
 	// Extract a list of artifact names from the artifact data structure returned from the
 	// github API.
 	var rawArtifacts []string
-	for i := range artifacts {
-		for j := range artifacts[i].Artifacts {
-			rawArtifacts = append(rawArtifacts, *artifacts[i].Artifacts[j].Name)
+	for _, ghArtifact := range artifacts {
+		for _, artifact := range ghArtifact.Artifacts {
+			rawArtifacts = append(rawArtifacts, *artifact.Name)
 		}
 	}
 
