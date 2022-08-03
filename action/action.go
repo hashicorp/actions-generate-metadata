@@ -3,18 +3,20 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	actions "github.com/sethvargo/go-githubactions"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+
+	actions "github.com/sethvargo/go-githubactions"
 )
 
 const defaultRepositoryOwner string = "hashicorp"
 const defaultMetadataFileName string = "metadata.json"
 
 type input struct {
+	artifacts        map[string][]string
 	branch           string
 	filePath         string
 	metadataFileName string
@@ -26,17 +28,19 @@ type input struct {
 }
 
 type Metadata struct {
-	Branch          string `json:"branch"`
-	BuildWorkflowId string `json:"buildworkflowid"`
-	Product         string `json:"product"`
-	Repo            string `json:"repo""`
-	Org             string `json:"org"`
-	Revision        string `json:"sha"`
-	Version         string `json:"version"`
+	Artifacts       map[string][]string `json:"artifacts"`
+	Branch          string              `json:"branch"`
+	BuildWorkflowId string              `json:"buildworkflowid"`
+	Product         string              `json:"product"`
+	Repo            string              `json:"repo""`
+	Org             string              `json:"org"`
+	Revision        string              `json:"sha"`
+	Version         string              `json:"version"`
 }
 
 func main() {
 	in := input{
+		artifacts         getArtifacts(actions.GetInput("repositoryOwner"), actions.GetInput("product"), GHACTIONRUNID)
 		branch:           actions.GetInput("branch"),
 		filePath:         actions.GetInput("filePath"),
 		metadataFileName: actions.GetInput("metadataFileName"),
