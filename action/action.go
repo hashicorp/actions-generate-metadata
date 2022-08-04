@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"strings"
 
 	actions "github.com/sethvargo/go-githubactions"
@@ -39,8 +40,12 @@ type Metadata struct {
 }
 
 func main() {
+	runIDint, err := strconv.ParseInt(os.Getenv("GITHUB_RUN_ID"), 10, 64)
+	if err != nil {
+		actions.Fatalf("GITHUB_RUN_ID is empty")
+	}
 	in := input{
-		artifacts         getArtifacts(actions.GetInput("repositoryOwner"), actions.GetInput("product"), GHACTIONRUNID)
+		artifacts:        getArtifacts(actions.GetInput("repositoryOwner"), actions.GetInput("product"), runIDint),
 		branch:           actions.GetInput("branch"),
 		filePath:         actions.GetInput("filePath"),
 		metadataFileName: actions.GetInput("metadataFileName"),
@@ -86,6 +91,11 @@ func createMetadataJson(in input) string {
 
 	actions.Infof("Working branch %v\n", branch)
 
+	artifacts := in.artifacts
+	if artifacts == nil {
+		actions.Fatalf("Missing artifacts list.")
+	}
+
 	file := in.metadataFileName
 	if file == "" {
 		file = defaultMetadataFileName
@@ -127,6 +137,7 @@ func createMetadataJson(in input) string {
 	actions.Infof("Creating metadata file in %v\n", filePath)
 
 	m := &Metadata{
+		Artifacts:       artifacts,
 		Product:         product,
 		Org:             org,
 		Revision:        sha,
