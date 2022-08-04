@@ -10,7 +10,7 @@ ENV GO111MODULE=on
 RUN go get -d -v
 
 # Compile the action
-RUN CGO_ENABLED=0 go build -o /action -ldflags="-s -w" action.go
+RUN CGO_ENABLED=0 go build -o /action -ldflags="-s -w" action.go metadata-support.go
 
 FROM alpine:latest
 RUN apk --update add ca-certificates
