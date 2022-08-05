@@ -93,7 +93,7 @@ func createMetadataJson(in input) string {
 
 	artifacts := in.artifacts
 	if artifacts == nil {
-		actions.Fatalf("Missing artifacts list.")
+		actions.Warningf("Missing artifacts list.")
 	}
 
 	file := in.metadataFileName
