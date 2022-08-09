@@ -33,9 +33,9 @@ type Metadata struct {
 	Product         string            `json:"product"`
 	Repo            string            `json:"repo"`
 	Org             string            `json:"org"`
-	ReleaseMetadata map[string]string `json:"release-metadata"`
+	ReleaseMetadata map[string]string `json:"releaseMetadata"`
 	Revision        string            `json:"sha"`
-	SecurityScan    map[string]string `json:"security-scan"`
+	SecurityScan    map[string]string `json:"securityScan"`
 	Version         string            `json:"version"`
 }
 
