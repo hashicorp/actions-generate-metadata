@@ -27,7 +27,6 @@ type input struct {
 	securityScan     string
 	sha              string
 	version          string
-	temptest         string
 }
 
 type Metadata struct {
@@ -39,7 +38,6 @@ type Metadata struct {
 	SecurityScan    string `json:"securityScan"`
 	Revision        string `json:"sha"`
 	Version         string `json:"version"`
-	Temptest        string `json:"temptest"`
 }
 
 func main() {
@@ -53,7 +51,6 @@ func main() {
 		sha:              actions.GetInput("sha"),
 		securityScan:     importSecScanMetadata(),
 		version:          actions.GetInput("version"),
-		temptest:         "testcontent",
 	}
 	generatedFile := createMetadataJson(in)
 
@@ -134,8 +131,6 @@ func createMetadataJson(in input) string {
 	}
 	actions.Infof("Working version %v\n", version)
 
-	temptest := in.temptest
-
 	actions.Infof("Creating metadata file in %v\n", filePath)
 
 	m := &Metadata{
@@ -146,8 +141,7 @@ func createMetadataJson(in input) string {
 		Version:         version,
 		Branch:          branch,
 		Repo:            repository,
-		SecurityScan:    securityScan,
-		Temptest:        temptest}
+		SecurityScan:    securityScan}
 	output, err := json.MarshalIndent(m, "", "\t\t")
 
 	if err != nil {
