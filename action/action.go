@@ -184,7 +184,7 @@ func execCommand(args ...string) string {
 // importSecScanMetadata reads the security scan from file and returns
 // it b64encoded.
 func importSecScanMetadata() string {
-	secScanFilePath := ".release/security-scan.hcl"
+	const secScanFilePath = ".release/security-scan.hcl"
 
 	scanfile, err := ioutil.ReadFile(secScanFilePath)
 	if err != nil {
