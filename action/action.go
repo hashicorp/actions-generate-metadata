@@ -120,7 +120,7 @@ func createMetadataJson(in input) string {
 
 	securityScan := in.securityScan
 	if securityScan == "" {
-		actions.Warningf("Missing security scan data.")
+                actions.Warningf("Missing security scan configuration.")
 	}
 
 	version := in.version
