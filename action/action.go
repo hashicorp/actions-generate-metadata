@@ -50,11 +50,10 @@ func main() {
 		product:          actions.GetInput("product"),
 		repo:             actions.GetInput("repository"),
 		org:              actions.GetInput("repositoryOwner"),
-		//		releaseMetadata:  importFromFile(".release/release-metadata.hcl"),
-		releaseMetadata: "teststring",
-		sha:             actions.GetInput("sha"),
-		securityScan:    importFromFile(".release/security-scan.hcl"),
-		version:         actions.GetInput("version"),
+		releaseMetadata:  importFromFile(".release/release-metadata.hcl"),
+		sha:              actions.GetInput("sha"),
+		securityScan:     importFromFile(".release/security-scan.hcl"),
+		version:          actions.GetInput("version"),
 	}
 	generatedFile := createMetadataJson(in)
 
