@@ -50,7 +50,7 @@ func main() {
 		product:          actions.GetInput("product"),
 		repo:             actions.GetInput("repository"),
 		org:              actions.GetInput("repositoryOwner"),
-		releaseMetadata:  importFromFile(".release/release-metadata.hcl"),
+		releaseMetadata:  importFromFile(".release/security-scan.hcl"),
 		sha:              actions.GetInput("sha"),
 		securityScan:     importFromFile(".release/security-scan.hcl"),
 		version:          actions.GetInput("version"),
