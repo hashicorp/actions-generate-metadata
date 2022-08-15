@@ -22,6 +22,7 @@ type input struct {
 	filePath         string
 	metadataFileName string
 	product          string
+	releaseMetadata  string
 	repo             string
 	org              string
 	securityScan     string
@@ -35,8 +36,9 @@ type Metadata struct {
 	Product         string `json:"product"`
 	Repo            string `json:"repo""`
 	Org             string `json:"org"`
-	SecurityScan    string `json:"securityScan"`
+	ReleaseMetadata string `json:"releaseMetadata"`
 	Revision        string `json:"sha"`
+	SecurityScan    string `json:"securityScan"`
 	Version         string `json:"version"`
 }
 
@@ -48,8 +50,9 @@ func main() {
 		product:          actions.GetInput("product"),
 		repo:             actions.GetInput("repository"),
 		org:              actions.GetInput("repositoryOwner"),
+		releaseMetadata:  importFromFile(".release/release-metadata.hcl"),
 		sha:              actions.GetInput("sha"),
-		securityScan:     importSecScanMetadata(),
+		securityScan:     importFromFile(".release/security-scan.hcl"),
 		version:          actions.GetInput("version"),
 	}
 	generatedFile := createMetadataJson(in)
@@ -120,7 +123,12 @@ func createMetadataJson(in input) string {
 
 	securityScan := in.securityScan
 	if securityScan == "" {
-                actions.Warningf("Missing security scan configuration.")
+		actions.Warningf("Missing security scan configuration.")
+	}
+
+	releaseMetadata := in.releaseMetadata
+	if securityScan == "" {
+		actions.Warningf("Missing release metadata configuration.")
 	}
 
 	version := in.version
@@ -140,6 +148,7 @@ func createMetadataJson(in input) string {
 		BuildWorkflowId: runId,
 		Version:         version,
 		Branch:          branch,
+		ReleaseMetadata: releaseMetadata,
 		Repo:            repository,
 		SecurityScan:    securityScan}
 	output, err := json.MarshalIndent(m, "", "\t\t")
@@ -181,14 +190,12 @@ func execCommand(args ...string) string {
 	return string(stdout.Bytes())
 }
 
-// importSecScanMetadata reads the security scan from file and returns
+// importFromFile reads the inputted file and returns
 // it b64encoded.
-func importSecScanMetadata() string {
-	const secScanFilePath = ".release/security-scan.hcl"
-
-	scanfile, err := ioutil.ReadFile(secScanFilePath)
+func importFromFile(filePath string) string {
+	scanfile, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		actions.Fatalf("Failure to read security scan file:", err)
+		actions.Fatalf("Failure to read metadata from file:", err)
 	}
 	return (b64.StdEncoding.EncodeToString(scanfile))
 }
