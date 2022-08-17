@@ -32,6 +32,8 @@ type Metadata struct {
 	Org             string `json:"org"`
 	Revision        string `json:"sha"`
 	Version         string `json:"version"`
+
+	actions "github.com/sethvargo/go-githubactions"
 }
 
 func main() {
