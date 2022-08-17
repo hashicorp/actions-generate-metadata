@@ -24,7 +24,6 @@ type input struct {
 	product          string
 	repo             string
 	org              string
-	securityScan     string
 	sha              string
 	version          string
 }
@@ -35,7 +34,6 @@ type Metadata struct {
 	Product         string `json:"product"`
 	Repo            string `json:"repo""`
 	Org             string `json:"org"`
-	SecurityScan    string `json:"securityScan"`
 	Revision        string `json:"sha"`
 	Version         string `json:"version"`
 }
@@ -49,7 +47,6 @@ func main() {
 		repo:             actions.GetInput("repository"),
 		org:              actions.GetInput("repositoryOwner"),
 		sha:              actions.GetInput("sha"),
-		securityScan:     importSecScanMetadata(),
 		version:          actions.GetInput("version"),
 	}
 	generatedFile := createMetadataJson(in)
@@ -118,11 +115,6 @@ func createMetadataJson(in input) string {
 		actions.Fatalf("GITHUB_RUN_ID is empty")
 	}
 
-	securityScan := in.securityScan
-	if securityScan == "" {
-                actions.Warningf("Missing security scan configuration.")
-	}
-
 	version := in.version
 	if version == "" {
 		actions.Fatalf("The version or version command is not provided")
@@ -140,8 +132,7 @@ func createMetadataJson(in input) string {
 		BuildWorkflowId: runId,
 		Version:         version,
 		Branch:          branch,
-		Repo:            repository,
-		SecurityScan:    securityScan}
+		Repo:            repository}
 	output, err := json.MarshalIndent(m, "", "\t\t")
 
 	if err != nil {
@@ -179,16 +170,4 @@ func execCommand(args ...string) string {
 		actions.Fatalf("Failed to run %v command %v: %v", name, cmd, err)
 	}
 	return string(stdout.Bytes())
-}
-
-// importSecScanMetadata reads the security scan from file and returns
-// it b64encoded.
-func importSecScanMetadata() string {
-	const secScanFilePath = ".release/security-scan.hcl"
-
-	scanfile, err := ioutil.ReadFile(secScanFilePath)
-	if err != nil {
-		actions.Fatalf("Failure to read security scan file:", err)
-	}
-	return (b64.StdEncoding.EncodeToString(scanfile))
 }
