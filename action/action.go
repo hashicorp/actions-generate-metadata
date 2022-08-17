@@ -8,10 +8,6 @@ import (
 	"os/exec"
 	"path"
 	"strings"
-
-	b64 "encoding/base64"
-
-	actions "github.com/sethvargo/go-githubactions"
 )
 
 const defaultRepositoryOwner string = "hashicorp"
