@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+
+	actions "github.com/sethvargo/go-githubactions"
 )
 
 const defaultRepositoryOwner string = "hashicorp"
@@ -32,8 +34,6 @@ type Metadata struct {
 	Org             string `json:"org"`
 	Revision        string `json:"sha"`
 	Version         string `json:"version"`
-
-	actions "github.com/sethvargo/go-githubactions"
 }
 
 func main() {
