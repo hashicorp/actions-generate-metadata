@@ -20,8 +20,10 @@ type input struct {
 	filePath         string
 	metadataFileName string
 	product          string
+	releaseMetadata  string
 	repo             string
 	org              string
+	securityScan     string
 	sha              string
 	version          string
 }
@@ -29,10 +31,12 @@ type input struct {
 type Metadata struct {
 	Branch          string `json:"branch"`
 	BuildWorkflowId string `json:"buildworkflowid"`
-	Product         string `json:"product"`
-	Repo            string `json:"repo""`
 	Org             string `json:"org"`
+	Product         string `json:"product"`
+	ReleaseMetadata string `json:"releaseMetadata"`
+	Repo            string `json:"repo""`
 	Revision        string `json:"sha"`
+	SecurityScan    string `json:"securityScan"`
 	Version         string `json:"version"`
 }
 
@@ -44,6 +48,8 @@ func main() {
 		product:          actions.GetInput("product"),
 		repo:             actions.GetInput("repository"),
 		org:              actions.GetInput("repositoryOwner"),
+		releaseMetadata:  importFromFile(".release/release-metadata.hcl"),
+		securityScan:     importFromFile(".release/security-scan.hcl"),
 		sha:              actions.GetInput("sha"),
 		version:          actions.GetInput("version"),
 	}
@@ -113,6 +119,16 @@ func createMetadataJson(in input) string {
 		actions.Fatalf("GITHUB_RUN_ID is empty")
 	}
 
+	securityScan := in.securityScan
+	if securityScan == "" {
+		actions.Warningf("Missing security scan configuration.")
+	}
+
+	releaseMetadata := in.releaseMetadata
+	if securityScan == "" {
+		actions.Warningf("Missing release metadata configuration.")
+	}
+
 	version := in.version
 	if version == "" {
 		actions.Fatalf("The version or version command is not provided")
@@ -130,7 +146,9 @@ func createMetadataJson(in input) string {
 		BuildWorkflowId: runId,
 		Version:         version,
 		Branch:          branch,
-		Repo:            repository}
+		ReleaseMetadata: releaseMetadata,
+		Repo:            repository,
+		SecurityScan:    securityScan}
 	output, err := json.MarshalIndent(m, "", "\t\t")
 
 	if err != nil {
@@ -168,4 +186,14 @@ func execCommand(args ...string) string {
 		actions.Fatalf("Failed to run %v command %v: %v", name, cmd, err)
 	}
 	return string(stdout.Bytes())
+}
+
+// importFromFile reads the inputted file from filePath and returns
+// it b64encoded.
+func importFromFile(filePath string) string {
+	scanfile, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		actions.Fatalf("Failure to read metadata from file:", err)
+	}
+	return (b64.StdEncoding.EncodeToString(scanfile))
 }
