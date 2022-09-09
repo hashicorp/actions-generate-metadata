@@ -9,6 +9,8 @@ import (
 	"path"
 	"strings"
 
+	b64 "encoding/base64"
+
 	actions "github.com/sethvargo/go-githubactions"
 )
 
