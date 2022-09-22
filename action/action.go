@@ -195,7 +195,7 @@ func execCommand(args ...string) string {
 func importFromFile(filePath string) string {
 	scanfile, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		actions.Fatalf("Failure to read metadata from file:", err)
+		actions.Warningf("No file found at %v; this is unusual in builds but normal in testing pipelines.", filePath)
 	}
 	return (b64.StdEncoding.EncodeToString(scanfile))
 }
