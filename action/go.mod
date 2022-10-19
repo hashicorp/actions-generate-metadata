@@ -1,6 +1,6 @@
 module github.com/hashicorp/actions-generate-metadata/action
 
-go 1.17
+go 1.18
 
 require github.com/sethvargo/go-githubactions v1.1.0
 
