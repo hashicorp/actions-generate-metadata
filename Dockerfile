@@ -1,4 +1,4 @@
-FROM golang:1.17 as build
+FROM golang:1.18 as build
 MAINTAINER Team Rel Eng team-rel-eng@hashicorp.com
 
 # Copy all the action files into the container
