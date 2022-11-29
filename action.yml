@@ -1,3 +1,6 @@
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: MPL-2.0
+
 name: generate-metadata action
 description: This action creates JSON file containing metadata information
 inputs:
