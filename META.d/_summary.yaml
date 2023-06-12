@@ -1,0 +1,8 @@
+---
+schema: 1.1
+category: tooling
+summary:
+  owner: team-rel-eng
+  description: |
+    This action creates JSON file containing metadata information from GHA run.
+  visibility: external
