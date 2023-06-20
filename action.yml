@@ -18,12 +18,13 @@ inputs:
     description: 'The product binary name'
     required: false
   repository:
-    description: 'The repository name for collecting the metadata'
+    description: 'The repository name for collecting the metadata. Default is set to $GITHUB_REPOSITORY'
     required: true
+    default: ${{ github.repository }}
   repositoryOwner:
-    description: 'The repository owner (organization or user). Default is set to "hashicorp" organization'
+    description: 'The repository owner (organization or user). Default is set to $GITHUB_REPOSITORY_OWNER'
     required: false
-    default: 'hashicorp'
+    default: ${{ github.repository_owner }}
   version:
     description: 'Version or version command (e.g: make version)'
     required: true
