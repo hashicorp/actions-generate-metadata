@@ -130,7 +130,7 @@ func createMetadataJson(in input) string {
 	}
 
 	releaseMetadata := in.releaseMetadata
-	if securityScan == "" {
+	if releaseMetadata == "" {
 		actions.Warningf("Missing release metadata configuration.")
 	}
 
