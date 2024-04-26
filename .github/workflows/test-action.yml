@@ -13,7 +13,7 @@ jobs:
       filepath: ${{ steps.action-run.outputs.filepath }}
     steps:
       - name: 'Checkout directory'
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
       - name: Generate metadata file
         id: generate_metadata
         uses: ./
@@ -33,7 +33,7 @@ jobs:
       filepath: ${{ steps.action-run.outputs.filepath }}
     steps:
       - name: 'Checkout directory'
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab #v3.5.2
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b #v4.1.4
       - name: Generate metadata file
         id: generate_metadata
         uses: ./
