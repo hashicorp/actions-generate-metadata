@@ -22,7 +22,7 @@ jobs:
           version: make -f tests/Makefile version
           product: ${{ github.event.repository.name }}
 
-      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #v3.1.2
+      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
         with:
           name: metadata.json
           path: ${{ steps.generate_metadata.outputs.filepath }}
@@ -44,7 +44,7 @@ jobs:
           sha: "6064764fb6b6213724fa55ce0fe737362ab97a12"
           metadataFileName: "metadata-sha-test.json"
 
-      - uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce #v3.1.2
+      - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 #v4.3.3
         with:
           name: metadata-sha-test.json
           path: ${{ steps.generate_metadata.outputs.filepath }}
