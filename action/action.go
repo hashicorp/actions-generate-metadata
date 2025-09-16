@@ -17,7 +17,6 @@ import (
 	actions "github.com/sethvargo/go-githubactions"
 )
 
-const defaultRepositoryOwner string = "hashicorp"
 const defaultMetadataFileName string = "metadata.json"
 
 type input struct {
@@ -110,13 +109,24 @@ func createMetadataJson(in input) string {
 	}
 	actions.Infof("Working sha %v\n", sha)
 
+	// FIXME: If we are using implicit values for repository ($GITHUB_REPOSITORY), do we even need the org?
 	org := in.org
 	if org == "" {
-		org = defaultRepositoryOwner
+		actions.Fatalf("organization is empty")
 	}
-	repository := in.repo
-	if repository == "" {
-		repository = strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")[1]
+
+	// The repository may be in one of two formats.
+	// The (implicit) default, $GITHUB_REPOSITORY, is in `org/proj` format.
+	// The (explicit) user-specified, which may *not* be fully-qualified.
+	// FIXME: Do we event want to support user-defined at all?
+	var repository string
+	before, after, found := strings.Cut(in.repo, "/")
+	if found && after != "" { // explicit format
+		repository = after
+	} else if !found && before != "" { // implicit format
+		repository = before
+	} else {
+		actions.Fatalf("repository is invalid, `%v`", in.repo)
 	}
 
 	runId := os.Getenv("GITHUB_RUN_ID")
