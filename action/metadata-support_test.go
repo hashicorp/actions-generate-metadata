@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -90,25 +88,4 @@ func TestExtractProductName(t *testing.T) {
 		assert.Equal(t, c.expected, extractProductName(c.name))
 	}
 
-}
-
-func TestReleaseSubDirOmitempty(t *testing.T) {
-	// When releaseSubDir is set, the JSON output must contain the key.
-	withSubDir := &Metadata{
-		Product:       "alpha-plugin",
-		ReleaseSubDir: "alpha-plugin",
-	}
-	out, err := json.Marshal(withSubDir)
-	assert.NoError(t, err)
-	assert.True(t, strings.Contains(string(out), `"release_sub_dir"`),
-		"expected release_sub_dir key in JSON when ReleaseSubDir is set")
-
-	// When releaseSubDir is empty, the JSON output must NOT contain the key (omitempty).
-	withoutSubDir := &Metadata{
-		Product: "consul",
-	}
-	out, err = json.Marshal(withoutSubDir)
-	assert.NoError(t, err)
-	assert.False(t, strings.Contains(string(out), `"release_sub_dir"`),
-		"expected no release_sub_dir key in JSON when ReleaseSubDir is empty")
 }

@@ -21,7 +21,6 @@ type input struct {
 	filePath         string
 	metadataFileName string
 	product          string
-	releaseSubDir    string
 	repo             string
 	org              string
 	sha              string
@@ -32,7 +31,6 @@ type Metadata struct {
 	Branch          string            `json:"branch"`
 	BuildWorkflowId string            `json:"buildworkflowid"`
 	Product         string            `json:"product"`
-	ReleaseSubDir   string            `json:"release_sub_dir,omitempty"`
 	Repo            string            `json:"repo"`
 	Org             string            `json:"org"`
 	ReleaseMetadata map[string]string `json:"releaseMetadata"`
@@ -47,7 +45,6 @@ func main() {
 		filePath:         actions.GetInput("filePath"),
 		metadataFileName: actions.GetInput("metadataFileName"),
 		product:          actions.GetInput("product"),
-		releaseSubDir:    actions.GetInput("releaseSubDir"),
 		repo:             actions.GetInput("repository"),
 		org:              actions.GetInput("repositoryOwner"),
 		sha:              actions.GetInput("sha"),
@@ -182,16 +179,15 @@ func createMetadataJson(in input) string {
 
 	metadata, err := b64EncodeReleaseMetadata([]string{productVersion})
 	if err != nil {
-		actions.Fatalf("%v", err)
+		actions.Fatalf(err.Error())
 	}
 	scan, err := b64EncodeSecurityScan([]string{productVersion})
 	if err != nil {
-		actions.Fatalf("%v", err)
+		actions.Fatalf(err.Error())
 	}
 
 	m := &Metadata{
 		Product:         product,
-		ReleaseSubDir:   in.releaseSubDir,
 		Org:             org,
 		Revision:        sha,
 		BuildWorkflowId: runId,
@@ -204,7 +200,7 @@ func createMetadataJson(in input) string {
 	output, err := json.MarshalIndent(m, "", "\t\t")
 
 	if err != nil {
-		actions.Fatalf("JSON marshal failure. Error:%v\n", err)
+		actions.Fatalf("JSON marshal failure. Error:%v\n", output, err)
 	} else {
 		err = ioutil.WriteFile(filePath, output, 0644)
 		if err != nil {
