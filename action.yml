@@ -30,7 +30,14 @@ inputs:
   sha:
     description: 'The build commit sha'
     required: false
-    
+  releaseSubDir:
+    description: >
+      Sub-directory name under .release/ that holds the ci.hcl for this
+      sub-product (e.g. "alpha-plugin"). The CRT orchestrator uses this
+      value to load .release/<releaseSubDir>/ci.hcl instead of the legacy
+      .release/ci.hcl. Leave empty (default) for single-product repos.
+    required: false
+    default: ''
 
 runs:
   using: docker
@@ -44,6 +51,7 @@ runs:
     - ${{ inputs.repositoryOwner }}
     - ${{ inputs.sha }}
     - ${{ inputs.version }}
+    - ${{ inputs.releaseSubDir }}
 
 outputs:
   filepath:
