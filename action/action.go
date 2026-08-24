@@ -30,6 +30,7 @@ type input struct {
 	repo             string
 	org              string
 	securityScan     string
+	securityScanPath string
 	sha              string
 	version          string
 }
@@ -48,6 +49,12 @@ type Metadata struct {
 }
 
 func main() {
+	const defaultSecurityScanPath = ".release/security-scan.hcl"
+	releaseSubDir := actions.GetInput("releaseSubDir")
+	securityScanPath := defaultSecurityScanPath
+	if releaseSubDir != "" {
+		securityScanPath = ".release/" + releaseSubDir + "/security-scan.hcl"
+	}
 	in := input{
 		branch:           actions.GetInput("branch"),
 		filePath:         actions.GetInput("filePath"),
@@ -56,8 +63,9 @@ func main() {
 		repo:             actions.GetInput("repository"),
 		org:              actions.GetInput("repositoryOwner"),
 		releaseMetadata:  importFromFile(".release/release-metadata.hcl"),
-		releaseSubDir:    actions.GetInput("releaseSubDir"),
-		securityScan:     importFromFile(".release/security-scan.hcl"),
+		releaseSubDir:    releaseSubDir,
+		securityScan:     importFromFile(securityScanPath),
+		securityScanPath: securityScanPath,
 		sha:              actions.GetInput("sha"),
 		version:          actions.GetInput("version"),
 	}
@@ -130,6 +138,8 @@ func createMetadataJson(in input) string {
 	securityScan := in.securityScan
 	if securityScan == "" {
 		actions.Warningf("Missing security scan configuration.")
+	} else {
+		actions.Infof("Loaded security-scan config from %v\n", in.securityScanPath)
 	}
 
 	releaseMetadata := in.releaseMetadata

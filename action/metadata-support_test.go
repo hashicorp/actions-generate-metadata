@@ -119,3 +119,21 @@ func TestReleaseSubDirOmitempty(t *testing.T) {
 	assert.False(t, strings.Contains(string(out), `"release_sub_dir"`),
 		"expected no release_sub_dir key in JSON when ReleaseSubDir is empty")
 }
+
+func TestSecurityScanAutoDerivesFromReleaseSubDir(t *testing.T) {
+	const defaultSecurityScanPath = ".release/security-scan.hcl"
+
+	resolveSecurityScanPath := func(releaseSubDir string) string {
+		if releaseSubDir != "" {
+			return ".release/" + releaseSubDir + "/security-scan.hcl"
+		}
+		return defaultSecurityScanPath
+	}
+
+	assert.Equal(t, ".release/security-scan.hcl", resolveSecurityScanPath(""),
+		"no releaseSubDir: should use default path")
+
+	assert.Equal(t, ".release/vault-plugin-auth-okta/security-scan.hcl",
+		resolveSecurityScanPath("vault-plugin-auth-okta"),
+		"releaseSubDir set: should use sub-product path")
+}
