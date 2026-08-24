@@ -26,9 +26,11 @@ type input struct {
 	metadataFileName string
 	product          string
 	releaseMetadata  string
+	releaseSubDir    string
 	repo             string
 	org              string
 	securityScan     string
+	securityScanPath string
 	sha              string
 	version          string
 }
@@ -39,6 +41,7 @@ type Metadata struct {
 	Org             string `json:"org"`
 	Product         string `json:"product"`
 	ReleaseMetadata string `json:"releaseMetadata"`
+	ReleaseSubDir   string `json:"release_sub_dir,omitempty"`
 	Repo            string `json:"repo""`
 	Revision        string `json:"sha"`
 	SecurityScan    string `json:"securityScan"`
@@ -46,6 +49,12 @@ type Metadata struct {
 }
 
 func main() {
+	const defaultSecurityScanPath = ".release/security-scan.hcl"
+	releaseSubDir := actions.GetInput("releaseSubDir")
+	securityScanPath := defaultSecurityScanPath
+	if releaseSubDir != "" {
+		securityScanPath = ".release/" + releaseSubDir + "/security-scan.hcl"
+	}
 	in := input{
 		branch:           actions.GetInput("branch"),
 		filePath:         actions.GetInput("filePath"),
@@ -54,7 +63,9 @@ func main() {
 		repo:             actions.GetInput("repository"),
 		org:              actions.GetInput("repositoryOwner"),
 		releaseMetadata:  importFromFile(".release/release-metadata.hcl"),
-		securityScan:     importFromFile(".release/security-scan.hcl"),
+		releaseSubDir:    releaseSubDir,
+		securityScan:     importFromFile(securityScanPath),
+		securityScanPath: securityScanPath,
 		sha:              actions.GetInput("sha"),
 		version:          actions.GetInput("version"),
 	}
@@ -127,6 +138,8 @@ func createMetadataJson(in input) string {
 	securityScan := in.securityScan
 	if securityScan == "" {
 		actions.Warningf("Missing security scan configuration.")
+	} else {
+		actions.Infof("Loaded security-scan config from %v\n", in.securityScanPath)
 	}
 
 	releaseMetadata := in.releaseMetadata
@@ -152,12 +165,13 @@ func createMetadataJson(in input) string {
 		Version:         version,
 		Branch:          branch,
 		ReleaseMetadata: releaseMetadata,
+		ReleaseSubDir:   in.releaseSubDir,
 		Repo:            repository,
 		SecurityScan:    securityScan}
 	output, err := json.MarshalIndent(m, "", "\t\t")
 
 	if err != nil {
-		actions.Fatalf("JSON marshal failure. Error:%v\n", output, err)
+		actions.Fatalf("JSON marshal failure. Error:%v\n", err)
 	} else {
 		err = ioutil.WriteFile(filePath, output, 0644)
 		if err != nil {

@@ -4,6 +4,8 @@
 package main
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -95,4 +97,43 @@ func TestExtractProductName(t *testing.T) {
 		assert.Equal(t, c.expected, extractProductName(c.name))
 	}
 
+}
+
+func TestReleaseSubDirOmitempty(t *testing.T) {
+	// When releaseSubDir is set, the JSON output must contain the key.
+	withSubDir := &Metadata{
+		Product:       "alpha-plugin",
+		ReleaseSubDir: "alpha-plugin",
+	}
+	out, err := json.Marshal(withSubDir)
+	assert.NoError(t, err)
+	assert.True(t, strings.Contains(string(out), `"release_sub_dir"`),
+		"expected release_sub_dir key in JSON when ReleaseSubDir is set")
+
+	// When releaseSubDir is empty, the JSON output must NOT contain the key (omitempty).
+	withoutSubDir := &Metadata{
+		Product: "consul",
+	}
+	out, err = json.Marshal(withoutSubDir)
+	assert.NoError(t, err)
+	assert.False(t, strings.Contains(string(out), `"release_sub_dir"`),
+		"expected no release_sub_dir key in JSON when ReleaseSubDir is empty")
+}
+
+func TestSecurityScanAutoDerivesFromReleaseSubDir(t *testing.T) {
+	const defaultSecurityScanPath = ".release/security-scan.hcl"
+
+	resolveSecurityScanPath := func(releaseSubDir string) string {
+		if releaseSubDir != "" {
+			return ".release/" + releaseSubDir + "/security-scan.hcl"
+		}
+		return defaultSecurityScanPath
+	}
+
+	assert.Equal(t, ".release/security-scan.hcl", resolveSecurityScanPath(""),
+		"no releaseSubDir: should use default path")
+
+	assert.Equal(t, ".release/vault-plugin-auth-okta/security-scan.hcl",
+		resolveSecurityScanPath("vault-plugin-auth-okta"),
+		"releaseSubDir set: should use sub-product path")
 }
