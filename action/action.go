@@ -50,10 +50,13 @@ type Metadata struct {
 
 func main() {
 	const defaultSecurityScanPath = ".release/security-scan.hcl"
+	const defaultReleaseMetadataPath = ".release/release-metadata.hcl"
 	releaseSubDir := actions.GetInput("releaseSubDir")
 	securityScanPath := defaultSecurityScanPath
+	releaseMetadataPath := defaultReleaseMetadataPath
 	if releaseSubDir != "" {
 		securityScanPath = ".release/" + releaseSubDir + "/security-scan.hcl"
+		releaseMetadataPath = ".release/" + releaseSubDir + "/release-metadata.hcl"
 	}
 	in := input{
 		branch:           actions.GetInput("branch"),
@@ -62,7 +65,7 @@ func main() {
 		product:          actions.GetInput("product"),
 		repo:             actions.GetInput("repository"),
 		org:              actions.GetInput("repositoryOwner"),
-		releaseMetadata:  importFromFile(".release/release-metadata.hcl"),
+		releaseMetadata:  importFromFile(releaseMetadataPath),
 		releaseSubDir:    releaseSubDir,
 		securityScan:     importFromFile(securityScanPath),
 		securityScanPath: securityScanPath,
