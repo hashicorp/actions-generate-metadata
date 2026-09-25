@@ -137,3 +137,21 @@ func TestSecurityScanAutoDerivesFromReleaseSubDir(t *testing.T) {
 		resolveSecurityScanPath("vault-plugin-auth-okta"),
 		"releaseSubDir set: should use sub-product path")
 }
+
+func TestReleaseMetadataAutoDerivesFromReleaseSubDir(t *testing.T) {
+	const defaultReleaseMetadataPath = ".release/release-metadata.hcl"
+
+	resolveReleaseMetadataPath := func(releaseSubDir string) string {
+		if releaseSubDir != "" {
+			return ".release/" + releaseSubDir + "/release-metadata.hcl"
+		}
+		return defaultReleaseMetadataPath
+	}
+
+	assert.Equal(t, ".release/release-metadata.hcl", resolveReleaseMetadataPath(""),
+		"no releaseSubDir: should use default path")
+
+	assert.Equal(t, ".release/vault-plugin-auth-okta/release-metadata.hcl",
+		resolveReleaseMetadataPath("vault-plugin-auth-okta"),
+		"releaseSubDir set: should use sub-product path")
+}
