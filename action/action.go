@@ -4,6 +4,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
@@ -48,15 +49,71 @@ type Metadata struct {
 	Version         string `json:"version"`
 }
 
+func resolveReleaseMetadataFilename(releaseSubDir string) string {
+	const defaultFilename = "release-metadata.hcl"
+	if releaseSubDir == "" {
+		return defaultFilename
+	}
+	data, err := os.ReadFile(".release/" + releaseSubDir + "/ci.hcl")
+	if err != nil {
+		return defaultFilename
+	}
+	// Walk line-by-line tracking brace depth within the promote-staging event block.
+	// depth == 0: outside everything
+	// depth == 1: inside event "promote-staging" { ... }
+	// depth == 2: inside action "promote-staging" { ... }
+	depth := 0
+	inPromoteStaging := false
+	inActionBlock := false
+	scanner := bufio.NewScanner(bytes.NewReader(data))
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		opens := strings.Count(line, "{")
+		closes := strings.Count(line, "}")
+		if !inPromoteStaging {
+			if strings.HasPrefix(line, `event "promote-staging"`) {
+				inPromoteStaging = true
+				depth = opens - closes
+			}
+			continue
+		}
+		depth += opens - closes
+		if !inActionBlock {
+			if strings.HasPrefix(line, `action "promote-staging"`) {
+				inActionBlock = true
+			}
+		} else {
+			if strings.HasPrefix(line, "config") {
+				parts := strings.SplitN(line, "=", 2)
+				if len(parts) == 2 {
+					name := strings.Trim(strings.TrimSpace(parts[1]), `"`)
+					if name != "" {
+						return name
+					}
+				}
+			}
+			if depth < 2 {
+				inActionBlock = false
+			}
+		}
+		if depth <= 0 {
+			break
+		}
+	}
+	return defaultFilename
+}
+
 func main() {
 	const defaultSecurityScanPath = ".release/security-scan.hcl"
-	const defaultReleaseMetadataPath = ".release/release-metadata.hcl"
 	releaseSubDir := actions.GetInput("releaseSubDir")
 	securityScanPath := defaultSecurityScanPath
-	releaseMetadataPath := defaultReleaseMetadataPath
+	releaseMetadataFilename := resolveReleaseMetadataFilename(releaseSubDir)
+	var releaseMetadataPath string
 	if releaseSubDir != "" {
 		securityScanPath = ".release/" + releaseSubDir + "/security-scan.hcl"
-		releaseMetadataPath = ".release/" + releaseSubDir + "/release-metadata.hcl"
+		releaseMetadataPath = ".release/" + releaseSubDir + "/" + releaseMetadataFilename
+	} else {
+		releaseMetadataPath = ".release/" + releaseMetadataFilename
 	}
 	in := input{
 		branch:           actions.GetInput("branch"),

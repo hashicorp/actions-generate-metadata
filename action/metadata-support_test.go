@@ -5,6 +5,8 @@ package main
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -138,20 +140,90 @@ func TestSecurityScanAutoDerivesFromReleaseSubDir(t *testing.T) {
 		"releaseSubDir set: should use sub-product path")
 }
 
-func TestReleaseMetadataAutoDerivesFromReleaseSubDir(t *testing.T) {
-	const defaultReleaseMetadataPath = ".release/release-metadata.hcl"
-
-	resolveReleaseMetadataPath := func(releaseSubDir string) string {
-		if releaseSubDir != "" {
-			return ".release/" + releaseSubDir + "/release-metadata.hcl"
-		}
-		return defaultReleaseMetadataPath
+func TestResolveReleaseMetadataFilename(t *testing.T) {
+	writeCIHCL := func(t *testing.T, dir, subDir, content string) {
+		t.Helper()
+		p := filepath.Join(dir, ".release", subDir)
+		os.MkdirAll(p, 0755)
+		os.WriteFile(filepath.Join(p, "ci.hcl"), []byte(content), 0644)
+	}
+	chdir := func(t *testing.T, dir string) {
+		t.Helper()
+		orig, _ := os.Getwd()
+		t.Cleanup(func() { os.Chdir(orig) })
+		os.Chdir(dir)
 	}
 
-	assert.Equal(t, ".release/release-metadata.hcl", resolveReleaseMetadataPath(""),
-		"no releaseSubDir: should use default path")
+	t.Run("no releaseSubDir returns default", func(t *testing.T) {
+		assert.Equal(t, "release-metadata.hcl", resolveReleaseMetadataFilename(""))
+	})
 
-	assert.Equal(t, ".release/vault-plugin-auth-okta/release-metadata.hcl",
-		resolveReleaseMetadataPath("vault-plugin-auth-okta"),
-		"releaseSubDir set: should use sub-product path")
+	t.Run("releaseSubDir with no ci.hcl returns default", func(t *testing.T) {
+		chdir(t, t.TempDir())
+		assert.Equal(t, "release-metadata.hcl", resolveReleaseMetadataFilename("no-such-product"))
+	})
+
+	t.Run("ci.hcl with no config field returns default", func(t *testing.T) {
+		dir := t.TempDir()
+		writeCIHCL(t, dir, "my-plugin", `
+event "promote-staging" {
+  action "promote-staging" {
+    organization = "hashicorp"
+    repository   = "crt-workflows-common"
+    workflow     = "promote-staging"
+  }
+}`)
+		chdir(t, dir)
+		assert.Equal(t, "release-metadata.hcl", resolveReleaseMetadataFilename("my-plugin"))
+	})
+
+	t.Run("ci.hcl with custom config field returns custom filename", func(t *testing.T) {
+		dir := t.TempDir()
+		writeCIHCL(t, dir, "trex", `
+event "promote-staging" {
+  action "promote-staging" {
+    organization = "hashicorp"
+    repository   = "crt-workflows-common"
+    workflow     = "promote-staging"
+    config       = "trex-release-metadata.hcl"
+  }
+}`)
+		chdir(t, dir)
+		assert.Equal(t, "trex-release-metadata.hcl", resolveReleaseMetadataFilename("trex"))
+	})
+
+	t.Run("ci.hcl with extra blocks before action still resolves config", func(t *testing.T) {
+		dir := t.TempDir()
+		writeCIHCL(t, dir, "trex", `
+event "promote-staging" {
+  depends = ["trigger-staging"]
+  notification {
+    on = "always"
+  }
+  action "promote-staging" {
+    organization = "hashicorp"
+    repository   = "crt-workflows-common"
+    workflow     = "promote-staging"
+    config       = "trex-release-metadata.hcl"
+  }
+  promotion-events {}
+}`)
+		chdir(t, dir)
+		assert.Equal(t, "trex-release-metadata.hcl", resolveReleaseMetadataFilename("trex"))
+	})
+}
+
+func TestReleaseMetadataAutoDerivesFromReleaseSubDir(t *testing.T) {
+	assert.Equal(t, "release-metadata.hcl", resolveReleaseMetadataFilename(""),
+		"no releaseSubDir: should use default")
+
+	dir := t.TempDir()
+	subDir := filepath.Join(dir, ".release", "vault-plugin-auth-okta")
+	os.MkdirAll(subDir, 0755)
+	orig, _ := os.Getwd()
+	t.Cleanup(func() { os.Chdir(orig) })
+	os.Chdir(dir)
+
+	assert.Equal(t, "release-metadata.hcl", resolveReleaseMetadataFilename("vault-plugin-auth-okta"),
+		"releaseSubDir set but no ci.hcl: should use default")
 }
