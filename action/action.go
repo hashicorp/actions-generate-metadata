@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"regexp"
 	"strings"
 
 	b64 "encoding/base64"
@@ -48,15 +49,34 @@ type Metadata struct {
 	Version         string `json:"version"`
 }
 
+func resolveReleaseMetadataFilename(releaseSubDir string) string {
+	const defaultFilename = "release-metadata.hcl"
+	if releaseSubDir == "" {
+		return defaultFilename
+	}
+	ciHCLPath := ".release/" + releaseSubDir + "/ci.hcl"
+	data, err := ioutil.ReadFile(ciHCLPath)
+	if err != nil {
+		return defaultFilename
+	}
+	re := regexp.MustCompile(`(?s)promote-staging[^{]*{[^}]*action\s+"promote-staging"\s*{[^}]*config\s*=\s*"([^"]+)"`)
+	if m := re.FindSubmatch(data); m != nil {
+		if name := strings.TrimSpace(string(m[1])); name != "" {
+			return name
+		}
+	}
+	return defaultFilename
+}
+
 func main() {
 	const defaultSecurityScanPath = ".release/security-scan.hcl"
-	const defaultReleaseMetadataPath = ".release/release-metadata.hcl"
 	releaseSubDir := actions.GetInput("releaseSubDir")
 	securityScanPath := defaultSecurityScanPath
-	releaseMetadataPath := defaultReleaseMetadataPath
+	releaseMetadataFilename := resolveReleaseMetadataFilename(releaseSubDir)
+	releaseMetadataPath := ".release/" + releaseMetadataFilename
 	if releaseSubDir != "" {
 		securityScanPath = ".release/" + releaseSubDir + "/security-scan.hcl"
-		releaseMetadataPath = ".release/" + releaseSubDir + "/release-metadata.hcl"
+		releaseMetadataPath = ".release/" + releaseSubDir + "/" + releaseMetadataFilename
 	}
 	in := input{
 		branch:           actions.GetInput("branch"),

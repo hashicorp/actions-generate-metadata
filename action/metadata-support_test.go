@@ -5,6 +5,8 @@ package main
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -136,6 +138,53 @@ func TestSecurityScanAutoDerivesFromReleaseSubDir(t *testing.T) {
 	assert.Equal(t, ".release/vault-plugin-auth-okta/security-scan.hcl",
 		resolveSecurityScanPath("vault-plugin-auth-okta"),
 		"releaseSubDir set: should use sub-product path")
+}
+
+func TestResolveReleaseMetadataFilename(t *testing.T) {
+	t.Run("no releaseSubDir returns default", func(t *testing.T) {
+		assert.Equal(t, "release-metadata.hcl", resolveReleaseMetadataFilename(""))
+	})
+
+	t.Run("releaseSubDir with no ci.hcl returns default", func(t *testing.T) {
+		assert.Equal(t, "release-metadata.hcl", resolveReleaseMetadataFilename("no-such-product"))
+	})
+
+	t.Run("ci.hcl with no config field returns default", func(t *testing.T) {
+		dir := t.TempDir()
+		subDir := filepath.Join(dir, ".release", "my-plugin")
+		os.MkdirAll(subDir, 0755)
+		os.WriteFile(filepath.Join(subDir, "ci.hcl"), []byte(`
+event "promote-staging" {
+  action "promote-staging" {
+    organization = "hashicorp"
+    repository   = "crt-workflows-common"
+    workflow     = "promote-staging"
+  }
+}`), 0644)
+		orig, _ := os.Getwd()
+		os.Chdir(dir)
+		defer os.Chdir(orig)
+		assert.Equal(t, "release-metadata.hcl", resolveReleaseMetadataFilename("my-plugin"))
+	})
+
+	t.Run("ci.hcl with custom config field returns custom filename", func(t *testing.T) {
+		dir := t.TempDir()
+		subDir := filepath.Join(dir, ".release", "trex")
+		os.MkdirAll(subDir, 0755)
+		os.WriteFile(filepath.Join(subDir, "ci.hcl"), []byte(`
+event "promote-staging" {
+  action "promote-staging" {
+    organization = "hashicorp"
+    repository   = "crt-workflows-common"
+    workflow     = "promote-staging"
+    config       = "trex-release-metadata.hcl"
+  }
+}`), 0644)
+		orig, _ := os.Getwd()
+		os.Chdir(dir)
+		defer os.Chdir(orig)
+		assert.Equal(t, "trex-release-metadata.hcl", resolveReleaseMetadataFilename("trex"))
+	})
 }
 
 func TestReleaseMetadataAutoDerivesFromReleaseSubDir(t *testing.T) {
